@@ -11,8 +11,11 @@ load_dotenv(dotenv_path=env_path)
 # debug (pode remover depois)
 print("API KEY:", os.getenv("GROQ_API_KEY"))
 
+from langchain_groq import ChatGroq
+
 llm = ChatGroq(
-    model="llama-3.3-8b-instant"
+    model="llama-3.1-8b-instant",
+    temperature=0.7
 )
 
 prompt = ChatPromptTemplate.from_template(
@@ -28,4 +31,4 @@ while True:
         break
 
     resposta = chain.invoke({"pergunta": pergunta})
-    print("IA:", resposta.content)
+    print("Valdir:", resposta.content)
