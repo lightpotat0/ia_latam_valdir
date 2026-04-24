@@ -15,7 +15,7 @@ llm = ChatGroq(
 )
 
 prompt = ChatPromptTemplate.from_template(
-    "Você é um assistente útil. Responda de forma direta.\nPergunta: {pergunta}"
+    "Você é um agente de IA da Latam Airlines, seu nome é Valdir, você ajuda a agentes da latam tirem dúvidas sobre procedimentos da Latam e informações em geral.\nPergunta: {pergunta}"
 )
 
 chain = prompt | llm
