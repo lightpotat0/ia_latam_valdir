@@ -10,60 +10,36 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
 from pathlib import Path
-from playwright.sync_api import sync_playwright
-from bs4 import BeautifulSoup
-import os
+from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(env_path)
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-def get_page_text(url):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=False,
-            args=["--disable-blink-features=AutomationControlled"]
-        )
+loader = DirectoryLoader(
+    './documentos_latam',
+    glob="./*.pdf",
+    loader_cls=PyPDFLoader
+)
 
-        page = browser.new_page(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-        )
-
-        try:
-            page.goto(url, timeout=60000)
-            page.wait_for_load_state("domcontentloaded")
-
-            html = page.content()
-
-        except Exception as e:
-            print("Erro ao carregar página:", e)
-            html = ""
-
-        finally:
-            browser.close()
-
-    soup = BeautifulSoup(html, "html.parser")
-    return soup.get_text(separator="\n", strip=True)
+docs_pdf = loader.load()
 
 url = "https://www.latamairlines.com/br/pt/central-ajuda"
-text = get_page_text(url)
+try:
+    html_text = get_page_text(url)
+    docs_web = [Document(page_content=html_text, metadata={"source": url})]
+except Exception as e:
+    print(f"Aviso: Não foi possível ler o site. Erro: {e}")
+    docs_web = []
 
-print("\n--- TEXTO COLETADO ---\n")
-print(text[:1000])
-
-docs = [Document(page_content=text)]
+todos_os_docs = docs_pdf + docs_web
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
     chunk_overlap=100
 )
 
-chunks = splitter.split_documents(docs)
-
-print(f"\nChunks criados: {len(chunks)}")
-
-embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
-)
+chunks = splitter.split_documents(todos_os_docs)
 
 vectorstore = FAISS.from_documents(chunks, embeddings)
 
