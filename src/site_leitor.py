@@ -105,4 +105,6 @@ def mapeamento(url_principal, pasta_destino):
         finally:
             browser.close()
 
-mapeamento("https://www.latamairlines.com/br/pt/central-ajuda", "../latam_arquivos_md")
+if __name__ == "__main__":
+    pote_de_biscoitos()
+    mapeamento("https://www.latamairlines.com/br/pt/central-ajuda", "../latam_arquivos_md")

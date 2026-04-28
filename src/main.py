@@ -54,7 +54,6 @@ Fontes consultadas: {', '.join(fontes)}"""
     return llm.invoke(prompt).content
 
 while True:
-    print("\nValdir:", responder(input("Pergunta: ")))
     pergunta = input("\nVocê: ")
     if pergunta.lower() in ["sair", "exit"]:
         break
