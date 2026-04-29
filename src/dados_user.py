@@ -1,8 +1,6 @@
 import csv
 from datetime import datetime
-
-from huggingface_hub import file_exists
-
+import os
 
 def salvar_falas(pergunta, resposta, fontes):
     log_file = "feedback"
@@ -20,9 +18,22 @@ def salvar_falas(pergunta, resposta, fontes):
             ", ".join(fontes),
         ])
 
+
 def responder(pergunta):
     docs_import = retriever.invoke(pergunta)
     contexto = ""
     fontes = set()
     for doc in docs_import:
         contexto += doc.page_content + "\n\n"
+        fontes.add(os.path.basename(doc.metadata.get('source', 'desconhecido')))
+
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system",
+         "Você é Valdir, agente da Latam Airlines. Responda APENAS com base no contexto fornecido. Se não souber, diga que não encontrou."),
+        ("human", f"Contexto:\n{contexto}\n\nPergunta: {pergunta}")
+    ])
+
+    resposta_final = llm.invoke(prompt_template.format_messages()).content
+    salvar_falas(pergunta, resposta_final, fontes)
+
+    return resposta_final
