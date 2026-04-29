@@ -1,0 +1,247 @@
+def calculo(cabine, trechos):
+    table = tabelas.get(cabine)
+    milhas = 0
+    detalhes = []
+
+    try:
+        for origem, destino in trechos:
+            conta = table[origem][destino]
+            milhas += conta
+            detalhes.append(f"{origem} para {destino}: {conta:,} milhas")
+        resultado = "\n".join(detalhes)
+        return f"Resumo da viagem na cabine {cabine}:\n{resultado}\nTOTAL: {milhas:,} milhas"
+
+    except KeyError as e:
+        return f"Erro: Uma das rotas ({e}) não existe na tabela {cabine}."
+
+tabela_fixa_first = {
+    "Brasil": {
+        "Brasil": 0, "América do Sul": 84000, "América Central": 144000, "América do Norte": 216000,
+        "Europa": 336000, "Oceania": 252000, "Oriente Médio": 378000, "África": 270000,
+        "Asia Oriental": 317000, "Asia Ocidental": 234000
+    },
+    "América do Sul": {
+        "Brasil": 84000, "América do Sul": 84000, "América Central": 144000, "América do Norte": 216000,
+        "Europa": 168000, "Oceania": 252000, "Oriente Médio": 225000, "África": 171000,
+        "Asia Oriental": 242000, "Asia Ocidental": 234000
+    },
+    "América Central": {
+        "Brasil": 144000, "América do Sul": 144000, "América Central": 84000, "América do Norte": 126000,
+        "Europa": 144000, "Oceania": 216000, "Oriente Médio": 242000, "África": 216000,
+        "Asia Oriental": 242000, "Asia Ocidental": 288000
+    },
+    "América do Norte": {
+        "Brasil": 216000, "América do Sul": 216000, "América Central": 126000, "América do Norte": 105000,
+        "Europa": 216000, "Oceania": 216000, "Oriente Médio": 312500, "África": 180000,
+        "Asia Oriental": 210000, "Asia Ocidental": 240000
+    },
+    "Europa": {
+        "Brasil": 336000, "América do Sul": 240000, "América Central": 144000, "América do Norte": 216000,
+        "Europa": 72000, "Oceania": 192000, "Oriente Médio": 94000, "África": 100800,
+        "Asia Oriental": 192000, "Asia Ocidental": 168000
+    },
+    "Oceania": {
+        "Brasil": 252000, "América do Sul": 252000, "América Central": 216000, "América do Norte": 216000,
+        "Europa": 192000, "Oceania": 90000, "Oriente Médio": 144000, "África": 120000,
+        "Asia Oriental": 120000, "Asia Ocidental": 144000
+    },
+    "Oriente Médio": {
+        "Brasil": 378000, "América do Sul": 225000, "América Central": 242000, "América do Norte": 312500,
+        "Europa": 94000, "Oceania": 144000, "Oriente Médio": 86400, "África": 101000,
+        "Asia Oriental": 136000, "Asia Ocidental": 101000
+    },
+    "África": {
+        "Brasil": 270000, "América do Sul": 171000, "América Central": 216000, "América do Norte": 180000,
+        "Europa": 100800, "Oceania": 120000, "Oriente Médio": 101000, "África": 84000,
+        "Asia Oriental": 120000, "Asia Ocidental": 114000
+    },
+    "Asia Oriental": {
+        "Brasil": 317000, "América do Sul": 242000, "América Central": 242000, "América do Norte": 210000,
+        "Europa": 192000, "Oceania": 120000, "Oriente Médio": 136000, "Asia Oriental": 120000,
+        "África": 84000, "Asia Ocidental": 114000
+    },
+    "Asia Ocidental": {
+        "Brasil": 234000, "América do Sul": 234000, "América Central": 288000, "América do Norte": 240000,
+        "Europa": 168000, "Oceania": 144000, "Oriente Médio": 101000, "África": 114000,
+        "Asia Oriental": 114000, "Asia Ocidental": 84000
+    }
+}
+
+tabela_fixa_executive = {
+    "Brasil": {
+        "Brasil": 0, "América do Sul": 48000, "América Central": 90000, "América do Norte": 135000,
+        "Europa": 201600, "Oceania": 198000, "Oriente Médio": 292000, "África": 157500,
+        "Ásia Oriental": 248000, "Ásia Ocidental": 180000
+    },
+    "América do Sul": {
+        "Brasil": 48000, "América do Sul": 66000, "América Central": 90000, "América do Norte": 108000,
+        "Europa": 120000, "Oceania": 198000, "Oriente Médio": 173000, "África": 144000,
+        "Ásia Oriental": 190000, "Ásia Ocidental": 180000
+    },
+    "América Central": {
+        "Brasil": 90000, "América do Sul": 90000, "América Central": 66000, "América do Norte": 99000,
+        "Europa": 108000, "Oceania": 162000, "Oriente Médio": 173000, "África": 162000,
+        "Ásia Oriental": 173000, "Ásia Ocidental": 216000
+    },
+    "América do Norte": {
+        "Brasil": 135000, "América do Sul": 108000, "América Central": 99000, "América do Norte": 82500,
+        "Europa": 162000, "Oceania": 162000, "Oriente Médio": 225000, "África": 135000,
+        "Ásia Oriental": 150000, "Ásia Ocidental": 180000
+    },
+    "Europa": {
+        "Brasil": 201600, "América do Sul": 120000, "América Central": 108000, "América do Norte": 162000,
+        "Europa": 72000, "Oceania": 144000, "Oriente Médio": 80000, "África": 108000,
+        "Ásia Oriental": 144000, "Ásia Ocidental": 120000
+    },
+    "Oceania": {
+        "Brasil": 198000, "América do Sul": 198000, "América Central": 162000, "América do Norte": 162000,
+        "Europa": 144000, "Oceania": 90000, "Oriente Médio": 108000, "África": 108000,
+        "Ásia Oriental": 108000, "Ásia Ocidental": 114000
+    },
+    "Oriente Médio": {
+        "Brasil": 292000, "América do Sul": 173000, "América Central": 173000, "América do Norte": 225000,
+        "Europa": 80000, "Oceania": 108000, "Oriente Médio": 93000, "África": 101000,
+        "Ásia Oriental": 108000, "Ásia Ocidental": 101000
+    },
+    "África": {
+        "Brasil": 157500, "América do Sul": 144000, "América Central": 162000, "América do Norte": 135000,
+        "Europa": 108000, "Oceania": 108000, "Oriente Médio": 101000, "África": 84000,
+        "Ásia Oriental": 108000, "Ásia Ocidental": 102000
+    },
+    "Ásia Oriental": {
+        "Brasil": 248000, "América do Sul": 190000, "América Central": 173000, "América do Norte": 150000,
+        "Europa": 144000, "Oceania": 108000, "Oriente Médio": 108000, "Ásia Oriental": 108000,
+        "África": 84000, "Ásia Ocidental": 90000
+    },
+    "Ásia Ocidental": {
+        "Brasil": 180000, "América do Sul": 180000, "América Central": 216000, "América do Norte": 180000,
+        "Europa": 120000, "Oceania": 114000, "Oriente Médio": 101000, "África": 102000,
+        "Ásia Oriental": 90000, "Ásia Ocidental": 84000
+    }
+}
+
+tabela_fixa_ecopremium = {
+    "Brasil": {
+        "Brasil": 0, "América do Sul": 43200, "América Central": 43200, "América do Norte": 75600,
+        "Europa": 90700, "Oceania": 114000, "Oriente Médio": 220500, "África": 137500,
+        "Asia Oriental": 214400, "Asia Ocidental": 136000
+    },
+    "América do Sul": {
+        "Brasil": 43200, "América do Sul": 43200, "América Central": 43200, "América do Norte": 70000,
+        "Europa": 75600, "Oceania": 114000, "Oriente Médio": 132000, "África": 124000,
+        "Asia Oriental": 132000, "Asia Ocidental": 137500
+    },
+    "América Central": {
+        "Brasil": 43200, "América do Sul": 43200, "América Central": 43200, "América do Norte": 65000,
+        "Europa": 75600, "Oceania": 114000, "Oriente Médio": 132000, "África": 134000,
+        "Asia Oriental": 132000, "Asia Ocidental": 178000
+    },
+    "América do Norte": {
+        "Brasil": 75600, "América do Sul": 70000, "América Central": 65000, "América do Norte": 54000,
+        "Europa": 54000, "Oceania": 89000, "Oriente Médio": 179000, "África": 119000,
+        "Asia Oriental": 104000, "Asia Ocidental": 119000
+    },
+    "Europa": {
+        "Brasil": 90700, "América do Sul": 75600, "América Central": 75600, "América do Norte": 54000,
+        "Europa": 54000, "Oceania": 71000, "Oriente Médio": 71000, "África": 95000,
+        "Asia Oriental": 83000, "Asia Ocidental": 95000
+    },
+    "Oceania": {
+        "Brasil": 114000, "América do Sul": 114000, "América Central": 114000, "América do Norte": 89000,
+        "Europa": 71000, "Oceania": 43200, "Oriente Médio": 108000, "África": 54000,
+        "Asia Oriental": 64800, "Asia Ocidental": 108000
+    },
+    "Oriente Médio": {
+        "Brasil": 220500, "América do Sul": 132000, "América Central": 132000, "América do Norte": 179000,
+        "Europa": 71000, "Oceania": 100000, "Oriente Médio": 54000, "África": 72000,
+        "Asia Oriental": 86400, "Asia Ocidental": 80000
+    },
+    "África": {
+        "Brasil": 137500, "América do Sul": 124000, "América Central": 134000, "América do Norte": 119000,
+        "Europa": 95000, "Oceania": 54000, "Oriente Médio": 86400, "África": 43200,
+        "Asia Oriental": 54000, "Asia Ocidental": 64800
+    },
+    "Asia Oriental": {
+        "Brasil": 214000, "América do Sul": 132000, "América Central": 132000, "América do Norte": 104000,
+        "Europa": 83000, "Oceania": 64800, "Oriente Médio": 86400, "África": 54000,
+        "Asia Oriental": 43200, "Asia Ocidental": 86400
+    },
+    "Asia Ocidental": {
+        "Brasil": 136000, "América do Sul": 137500, "América Central": 178000, "América do Norte": 119000,
+        "Europa": 95000, "Oceania": 108000, "Oriente Médio": 86400, "África": 64800,
+        "Asia Oriental": 86400, "Asia Ocidental": 43200
+    }
+}
+
+tabela_fixa_economy = {
+    "Brasil": {
+        "Brasil": 0, "Argentina": 24000, "América do Sul": 24000, "América Central": 42000,
+        "América do Norte": 57000, "Europa": 80700, "Oceania": 95000, "Oriente Médio": 121500,
+        "África": 62000, "Asia Oriental": 125500, "Asia Ocidental": 82500
+    },
+    "Argentina": {
+        "Brasil": 24000, "Argentina": 24000, "América do Sul": 24000, "América Central": 42000,
+        "América do Norte": 42000, "Europa": 48000, "Oceania": 95000, "Oriente Médio": 71300,
+        "África": 41000, "Asia Oriental": 95000, "Asia Ocidental": 82500
+    },
+    "América do Sul": {
+        "Brasil": 24000, "Argentina": 24000, "América do Sul": 24000, "América Central": 42000,
+        "América do Norte": 42000, "Europa": 48000, "Oceania": 95000, "Oriente Médio": 71300,
+        "África": 41000, "Asia Oriental": 95000, "Asia Ocidental": 82500
+    },
+    "América Central": {
+        "Brasil": 42000, "Argentina": 42000, "América do Sul": 42000, "América Central": 30000,
+        "América do Norte": 30000, "Europa": 36000, "Oceania": 66000, "Oriente Médio": 66000,
+        "África": 58000, "Asia Oriental": 66000, "Asia Ocidental": 82500
+    },
+    "América do Norte": {
+        "Brasil": 57000, "Argentina": 42000, "América do Sul": 42000, "América Central": 30000,
+        "América do Norte": 30000, "Europa": 36000, "Oceania": 39500, "Oriente Médio": 79000,
+        "África": 46000, "Asia Oriental": 53000, "Asia Ocidental": 66000
+    },
+    "Europa": {
+        "Brasil": 80700, "Argentina": 48000, "América do Sul": 48000, "América Central": 36000,
+        "América do Norte": 36000, "Europa": 24000, "Oceania": 60000, "Oriente Médio": 36000,
+        "África": 36000, "Asia Oriental": 60000, "Asia Ocidental": 48000
+    },
+    "Oceania": {
+        "Brasil": 95000, "Argentina": 95000, "América do Sul": 95000, "América Central": 66000,
+        "América do Norte": 39500, "Europa": 60000, "Oceania": 36000, "Oriente Médio": 48000,
+        "África": 48000, "Asia Oriental": 48000, "Asia Ocidental": 60000
+    },
+    "Oriente Médio": {
+        "Brasil": 121500, "Argentina": 71300, "América do Sul": 71300, "América Central": 66000,
+        "América do Norte": 79000, "Europa": 36000, "Oceania": 48000, "Oriente Médio": 29000,
+        "África": 36000, "Asia Oriental": 43000, "Asia Ocidental": 36000
+    },
+    "África": {
+        "Brasil": 62000, "Argentina": 41000, "América do Sul": 41000, "América Central": 58000,
+        "América do Norte": 46000, "Europa": 36000, "Oceania": 48000, "Oriente Médio": 36000,
+        "África": 24000, "Asia Oriental": 48000, "Asia Ocidental": 42000
+    },
+    "Asia Oriental": {
+        "Brasil": 125500, "Argentina": 95000, "América do Sul": 95000, "América Central": 66000,
+        "América do Norte": 53000, "Europa": 60000, "Oceania": 48000, "Oriente Médio": 43000,
+        "África": 48000, "Asia Oriental": 24000, "Asia Ocidental": 30000
+    },
+    "Asia Ocidental": {
+        "Brasil": 82500, "Argentina": 82500, "América do Sul": 82500, "América Central": 82500,
+        "América do Norte": 66000, "Europa": 48000, "Oceania": 60000, "Oriente Médio": 36000,
+        "África": 42000, "Asia Oriental": 30000, "Asia Ocidental": 24000
+    }
+}
+
+tabelas = {
+    "Primeira Classe": tabela_fixa_first,
+    "Classe Executiva":tabela_fixa_executive,
+    "Premium Economy":tabela_fixa_ecopremium,
+    "Class Economy":tabela_fixa_economy
+}
+
+trechos_viagem = [
+    ("Oceania", "Europa"),
+    ("Europa", "Oriente Médio")
+]
+
+result = calculo("Class Economy", trechos_viagem)
+print(result)
