@@ -17,7 +17,7 @@ def pote_de_biscoitos():
         context.storage_state(path="state.json")
         browser.close()
 
-def mapeamento(url_principal, pasta_destino):
+def mapeamento(url_principal, pasta_destino, urls_especificas):
     pasta_abs = os.path.abspath(pasta_destino)
     os.makedirs(pasta_abs, exist_ok=True)
 
@@ -34,6 +34,11 @@ def mapeamento(url_principal, pasta_destino):
 
         print(f"Iniciando Mapeamento: {url_principal}")
         urls_coletadas = set()
+
+        if urls_especificas:
+            for url in urls_especificas:
+                urls_coletadas.add(url)
+            print(f"Adicionadas {len(urls_especificas)} URLs específicas à fila.")
 
         try:
             page.goto(url_principal, wait_until="domcontentloaded", timeout=60000)
@@ -58,7 +63,7 @@ def mapeamento(url_principal, pasta_destino):
                         if href and "/perguntas/" in href:
                             sub_urls.append(href if href.startswith("http") else f"https://www.latamairlines.com{href}")
 
-                    sub_urls = list(set(sub_urls))  # Remove duplicados
+                    sub_urls = list(set(sub_urls))
                     print(f"Encontradas {len(sub_urls)} subcategorias. Explorando Nível 3...")
 
                     for sub_url in sub_urls:
@@ -68,46 +73,47 @@ def mapeamento(url_principal, pasta_destino):
 
                             try:
                                 ver_mais = page.locator(
-                                    'button:has-text("Ver mais"), button:has-text("Ver todos")').all()
+                                    'button:has-text("Ver mais"), button:has-text("Ver todos"), button:has-text("Conferir benefícios")').all()
                                 for btn in ver_mais: btn.click(timeout=2000)
                             except:
                                 pass
 
                             links_finais = page.evaluate("""
-                                                         () => {
-                                                             const base = "https://www.latamairlines.com/br/pt/central-ajuda";
-                                                             return Array.from(document.querySelectorAll('a'))
-                                                                 .map(a => a.href)
-                                                                 .filter(href => href.startsWith(base) &&
-                                                                     href.split('/').length >= 9 && // Garante que é o artigo final
-                                                                     !href.includes('#'));
-                                                         }
-                                                         """)
-                            for l in links_finais:
-                                urls_coletadas.add(l)
+                                () => {
+                                    const base1 = "https://www.latamairlines.com/br/pt/central-ajuda";
+                                    const base2 = "https://latampass.latam.com/pt_br/clube";
+                                    return Array.from(document.querySelectorAll('a'))
+                                        .map(a => a.href)
+                                        .filter(href => {
+                                            const h = href.toLowerCase();
+                                            return (h.startsWith(base1) && h.split('/').length >= 9) || 
+                                                   (h.startsWith(base2) && h.split('/').length >= 6);
+                                        });
+                                }
+                            """)
+                            for l in links_finais: urls_coletadas.add(l)
                         except:
                             continue
-
                     page.goto(url_principal, wait_until="domcontentloaded")
-                except Exception as e:
-                    print(f"Erro no card {i + 1}: {e}")
-                    page.goto(url_principal, wait_until="domcontentloaded")
-
+                except:
+                    continue
             lista_final = sorted(list(urls_coletadas))
             print(f"\nTotal: {len(lista_final)} artigos finais (Nível 4) encontrados.")
 
             for i, url in enumerate(lista_final):
                 try:
-                    slug = url.split("central-ajuda/")[-1].replace("/", "-").strip("-")
-                    if not slug: slug = f"artigo_{i}"
+                    slug = url.replace("https://", "").replace("www.", "").replace("/", "-").replace(".", "-").replace(
+                        "?", "-").strip("-")
+                    if len(slug) > 150: slug = slug[:150]
+
                     caminho_file = os.path.join(pasta_abs, f"{slug}.md")
 
                     if not os.path.exists(caminho_file):
                         print(f"[{i + 1}/{len(lista_final)}] Baixando conteúdo: {slug}")
                         page.goto(url, wait_until="domcontentloaded", timeout=45000)
                         try:
-                            page.wait_for_selector("main, article", timeout=5000)
-                            html_main = page.inner_html("main") or page.inner_html("article")
+                            page.wait_for_selector("main, article, #content, .content", timeout=5000)
+                            html_main = page.inner_html("main") or page.inner_html("article") or page.inner_html("#content")
                         except:
                             html_main = page.inner_html("body")
 
@@ -123,5 +129,22 @@ def mapeamento(url_principal, pasta_destino):
             browser.close()
 
 if __name__ == "__main__":
+    meus_links_extras = [
+        "https://latampass.latam.com/pt_br/categorias-elite",
+        "https://latampass.latam.com/pt_br/clube",
+        "https://latampass.latam.com/pt_br/institucional",
+        "https://latampass.latam.com/pt_br/junte-milhas/parceiros",
+        "https://latampass.latam.com/pt_br/latampass-itau",
+        "https://latampass.latam.com/pt_br/ganhar-milhas/cartoes-de-bancos",
+        "https://latampass.latam.com/pt_br/milhas/acelere-suas-milhas/transferir",
+        "https://latampass.latam.com/pt_br/regulamento/beneficios",
+        "https://latampass.latam.com/pt_br/milhas/como-juntar-milhas/solicitar-milhas-em-voo/companhias-parceiras",
+        "https://latampass.latam.com/pt_br/viagem/usar-milhas-para-voar/regras-de-resgate/latam/classe-economica"
+    ]
+
     pote_de_biscoitos()
-    mapeamento("https://www.latamairlines.com/br/pt/central-ajuda", "../latam_arquivos_md")
+    mapeamento(
+        url_principal="https://www.latamairlines.com/br/pt/central-ajuda",
+        pasta_destino="../latam_arquivos_md",
+        urls_especificas=meus_links_extras
+    )
