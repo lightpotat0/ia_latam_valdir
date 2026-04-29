@@ -1,5 +1,4 @@
 import json
-import os
 
 with open('cabines.json', "r", encoding="utf-8") as f:
     cabines = json.load(f)
