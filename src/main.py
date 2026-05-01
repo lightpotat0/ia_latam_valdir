@@ -2,15 +2,15 @@ import os
 import torch
 from dotenv import load_dotenv
 from pathlib import Path
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from langchain_groq import ChatGroq
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import TextLoader
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv()
-print("GROQ KEY:", os.getenv("GROQ_API_KEY"))
 device = "cuda" if torch.cuda.is_available() else "cpu"
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",
@@ -30,6 +30,17 @@ llm = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0
 )
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+class ChatRequest(BaseModel):
+    pergunta: str
+
 def responder(pergunta):
     docs = retriever.invoke(pergunta)
     if not docs:
@@ -67,10 +78,12 @@ def responder(pergunta):
     return f"""{resposta}
 """
 
-while True:
-    pergunta = input("\nVocê: ")
+@app.get("/")
+def home():
+    return {"status": "ok", "message": "Valdir API online 🚀"}
 
-    if pergunta.lower() in ["sair", "exit"]:
-        break
 
-    print("\nValdir:", responder(pergunta))
+@app.post("/chat")
+def chat(req: ChatRequest):
+    resposta = responder(req.pergunta)
+    return {"resposta": resposta}

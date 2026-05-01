@@ -8,42 +8,35 @@ export default function Home() {
   const [chat, setChat] = useState<{ role: string; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
-  async function enviarMensagem() {
-    if (!mensagem) return;
+async function enviarMensagem() {
+  if (!mensagem) return;
+  const texto = mensagem;
+  setChat((prev) => [...prev, { role: "user", text: texto }]);
+  setMensagem("");
+  setLoading(true);
+  try {
+    const res = await fetch("https://ialatamvaldir-production.up.railway.app/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ pergunta: texto }),
+    });
 
-    const novaMsg = {role: "user", text: mensagem};
-    setChat((prev) => [...prev, novaMsg]);
-    setMensagem("");
-    setLoading(true);
+    const data = await res.json();
 
-    try {
-        const res = await fetch("http://127.0.0.1:8000/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ pergunta: mensagem }),
-        });
-
-        console.log("STATUS:", res.status);
-
-        const data = await res.json();
-        console.log("DATA:", data);
-
-      setChat((prev) => [
-        ...prev,
-        {role: "bot", text: data.resposta},
-      ]);
-    } catch (err) {
-      setChat((prev) => [
-        ...prev,
-        {role: "bot", text: "Erro ao conectar com a API"},
-      ]);
-    }
-
-    setLoading(false);
+    setChat((prev) => [
+      ...prev,
+      { role: "bot", text: data.resposta },
+    ]);
+  } catch (err) {
+    setChat((prev) => [
+      ...prev,
+      { role: "bot", text: "Erro ao conectar com a API" },
+    ]);
   }
-
+  setLoading(false);
+}
   return (
       <div className="min-h-screen bg-gray-50 text-white flex flex-col items-center">
         <Image
