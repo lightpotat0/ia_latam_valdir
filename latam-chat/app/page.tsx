@@ -17,15 +17,18 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({pergunta: mensagem}),
-      });
+        const res = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ pergunta: mensagem }),
+        });
 
-      const data = await res.json();
+        console.log("STATUS:", res.status);
+
+        const data = await res.json();
+        console.log("DATA:", data);
 
       setChat((prev) => [
         ...prev,
