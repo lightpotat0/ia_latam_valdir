@@ -38,15 +38,15 @@ async function enviarMensagem() {
   setLoading(false);
 }
   return (
-      <div className="min-h-screen bg-gray-50 text-white flex flex-col items-center">
+      <div className="min-h-screen bg-[#f4f4f7] text-white flex flex-col items-center">
         <Image
             src="/valdir_logo-.png"
             alt="Valdir"
             width={300}
             height={120}
-            className="mt-6 border-5 border-b-blue-700"
+            className="mt-3 border-5 border-b-blue-700"
         />
-        <div className="min-h-200 bg-blue-400 text-white flex flex-col w-250 border-4 border-blue-500 rounded-2xl shadow-lg">
+        <div className="min-h-200 bg-blue-400 text-white flex flex-col w-250 border-4 border-[#1c1c3c] rounded-2xl shadow-lg">
 
           <div className="flex-1 p-20 overflow-y-auto w-1200px h-auto m-5 bg-blue-950">
             {chat.map((msg, i) => (
