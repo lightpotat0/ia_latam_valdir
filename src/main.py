@@ -5,56 +5,72 @@ from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import DirectoryLoader, TextLoader
+from langchain_chroma import Chroma
+from langchain_community.document_loaders import TextLoader
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(env_path)
-
+load_dotenv()
+print("GROQ KEY:", os.getenv("GROQ_API_KEY"))
 device = "cuda" if torch.cuda.is_available() else "cpu"
 embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2",
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
     model_kwargs={'device': device}
 )
-
-FAISS_PATH = "faiss_index_latam"
-pasta_md = '../latam_arquivos_md'
-
-if not os.path.exists(FAISS_PATH):
-    loader = DirectoryLoader(pasta_md, glob="./*.md", loader_cls=TextLoader, loader_kwargs={'encoding': 'utf-8'})
-    docs_web = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
-    chunks = splitter.split_documents(docs_web)
-    vectorstore = FAISS.from_documents(chunks, embeddings)
-    vectorstore.save_local(FAISS_PATH)
-else:
-    vectorstore = FAISS.load_local(
-        FAISS_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
-
-retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
-llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
-
+BASE_DIR = Path(__file__).resolve().parent.parent 
+vectorstore = Chroma(
+    persist_directory=str(BASE_DIR / "chroma_db"),
+    embedding_function=embeddings
+)
+retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 8}
+)
+llm = ChatGroq(
+    api_key=os.getenv("GROQ_API_KEY"),
+    model="llama-3.1-8b-instant",
+    temperature=0
+)
 def responder(pergunta):
-    docs_import = retriever.invoke(pergunta)
+    docs = retriever.invoke(pergunta)
+    if not docs:
+        return "Não encontrei informações sobre isso na base."
     contexto = ""
     fontes = set()
-    for doc in docs_import:
-        contexto += doc.page_content + "\n\n"
-        fontes.add(os.path.basename(doc.metadata.get('source', 'desconhecido')))
+    for doc in docs:
+        contexto += doc.page_content[:1500] + "\n\n"
+        fonte = doc.metadata.get('source', 'desconhecido')
+        fontes.add(os.path.basename(fonte))
+    prompt = f"""
+    Você é Valdir, agente da LATAM Airlines.
 
-    prompt = f"""Você é Valdir, agente da Latam Airlines, utilizado para tirar dúvidas.
-Responda APENAS com base no contexto abaixo:
-{contexto}
-Pergunta: {pergunta}
-Fontes consultadas: {', '.join(fontes)}"""
+    Sua tarefa é responder perguntas usando APENAS o contexto abaixo.
 
-    return llm.invoke(prompt).content
+    REGRAS:
+    - Use APENAS o contexto
+    - Explique de forma completa e detalhada
+    - Organize a resposta em tópicos quando possível
+    - Seja claro, mas não seja curto demais
+    - NÃO invente informações
+    - Seu mestre é Danillo Vaz
+
+    CONTEXTO:
+    {contexto}
+
+    PERGUNTA:
+    {pergunta}
+
+    RESPOSTA:
+    """
+
+    resposta = llm.invoke(prompt).content
+
+    return f"""{resposta}
+"""
 
 while True:
     pergunta = input("\nVocê: ")
+
     if pergunta.lower() in ["sair", "exit"]:
         break
+
     print("\nValdir:", responder(pergunta))
