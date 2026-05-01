@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
+from huggingface_hub import logging
 from langchain_chroma import Chroma
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -16,6 +17,8 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",
     model_kwargs={'device': device}
 )
+logging.set_verbosity_error()
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 BASE_DIR = Path(__file__).resolve().parent.parent 
 vectorstore = Chroma(
     persist_directory=str(BASE_DIR / "chroma_db"),
