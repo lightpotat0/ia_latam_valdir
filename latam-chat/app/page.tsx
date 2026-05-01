@@ -46,7 +46,7 @@ async function enviarMensagem() {
             height={120}
             className="mt-6 border-5 border-b-blue-700"
         />
-        <div className="min-h-200 bg-blue-400 text-white flex flex-col w-250 ml-auto mr-110 border-4 border-blue-500 rounded-2xl shadow-lg">
+        <div className="min-h-200 bg-blue-400 text-white flex flex-col w-250 border-4 border-blue-500 rounded-2xl shadow-lg">
 
           <div className="flex-1 p-20 overflow-y-auto w-1200px h-auto m-5 bg-blue-950">
             {chat.map((msg, i) => (
