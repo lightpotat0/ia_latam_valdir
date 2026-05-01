@@ -26,7 +26,7 @@ async function enviarMensagem() {
     const data = await res.json();
 
     setChat((prev) => [
-      ...prev,
+      ...prev,  
       { role: "bot", text: data.resposta },
     ]);
   } catch (err) {

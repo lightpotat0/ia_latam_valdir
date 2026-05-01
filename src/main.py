@@ -35,14 +35,7 @@ llm = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0
 )
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 class ChatRequest(BaseModel):
     pergunta: str
 
@@ -83,12 +76,6 @@ def responder(pergunta):
     return f"""{resposta}
 """
 
-@app.get("/")
-def home():
-    return {"status": "ok", "message": "Valdir API online 🚀"}
-
-
-@app.post("/chat")
 def chat(req: ChatRequest):
     resposta = responder(req.pergunta)
     return {"resposta": resposta}
