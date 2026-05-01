@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from src.main import responder
+from main import responder
 app = FastAPI()
 
 app.add_middleware(
