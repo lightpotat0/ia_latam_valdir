@@ -1,9 +1,7 @@
-fastapi
-uvicorn
-langchain
-langchain-community
-langchain-chroma
-langchain-groq
-python-dotenv
 torch
+python-dotenv
+langchain-groq
+langchain-text-splitters
+langchain-community
+faiss-cpu
 sentence-transformers
