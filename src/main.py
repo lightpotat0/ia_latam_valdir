@@ -10,6 +10,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from huggingface_hub import logging
 from langchain_chroma import Chroma
 
+os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv()
 device = "cuda" if torch.cuda.is_available() else "cpu"
