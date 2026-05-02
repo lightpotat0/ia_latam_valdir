@@ -15,10 +15,8 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv()
-device = "cpu"
 embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2",
-    model_kwargs={'device': device}
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 logging.set_verbosity_error()
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
