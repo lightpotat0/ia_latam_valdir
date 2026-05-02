@@ -1,5 +1,4 @@
 import os
-import torch
 from dotenv import load_dotenv
 from pathlib import Path
 from fastapi import FastAPI
@@ -12,9 +11,11 @@ from langchain_chroma import Chroma
 
 os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
 os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv()
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",
     model_kwargs={'device': device}
