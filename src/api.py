@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from main import responder, ChatRequest
 app = FastAPI()
 
+class ChatRequest(BaseModel):
+    pergunta: str
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
