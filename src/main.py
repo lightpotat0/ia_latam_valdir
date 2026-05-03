@@ -3,13 +3,14 @@ from dotenv import load_dotenv
 from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.embeddings import init_embeddings
+from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+embeddings = OpenAIEmbeddings(
+    api_key=os.getenv("OPENAI_API_KEY")
 )
 vectorstore = Chroma(
     persist_directory=str(BASE_DIR / "chroma_db"),
