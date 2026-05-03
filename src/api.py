@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from main import responder, ChatRequest
+from main import responder
 app = FastAPI()
 
 class ChatRequest(BaseModel):
