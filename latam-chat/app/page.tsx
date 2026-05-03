@@ -15,7 +15,7 @@ async function enviarMensagem() {
   setMensagem("");
   setLoading(true);
   try {
-    const res = await fetch("http://56.125.188.138:8000/chat", {
+    const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
