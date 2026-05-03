@@ -4,17 +4,12 @@ from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain.embeddings import init_embeddings
-from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-embeddings = OpenAIEmbeddings(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
 vectorstore = Chroma(
     persist_directory=str(BASE_DIR / "chroma_db"),
-    embedding_function=embeddings
 )
 retriever = vectorstore.as_retriever(
     search_type="mmr",
