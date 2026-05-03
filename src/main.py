@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
-from langchain.embeddings import init_embeddings
 
 load_dotenv()
 
