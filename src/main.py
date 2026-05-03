@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
-
-load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 vectorstore = Chroma(
@@ -14,11 +11,17 @@ retriever = vectorstore.as_retriever(
     search_type="mmr",
     search_kwargs={"k": 8}
 )
-llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    model="llama-3.1-8b-instant",
-    temperature=0
-)
+llm = None
+
+def get_llm():
+    global llm
+    if llm is None:
+        llm = ChatGroq(
+            api_key=os.getenv("GROQ_API_KEY"),
+            model="llama-3.1-8b-instant",
+            temperature=0
+        )
+    return llm
 
 def responder(pergunta):
     docs = retriever.invoke(pergunta)
@@ -49,5 +52,5 @@ def responder(pergunta):
     {pergunta}
     """
 
-    resposta = llm.invoke(prompt).content
+    resposta = get_llm().invoke(prompt).content
     return resposta
