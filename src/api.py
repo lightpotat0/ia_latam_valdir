@@ -16,7 +16,7 @@ app.add_middleware(
 )
 @app.get("/")
 def home():
-    return {"status": "ok", "message": "Valdir API online 🚀"}
+    return {"status": "ok", "message": "Valdir API online"}
 
 @app.post("/chat")
 def chat(req: ChatRequest):

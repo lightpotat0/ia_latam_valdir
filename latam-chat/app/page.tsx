@@ -15,7 +15,7 @@ async function enviarMensagem() {
   setMensagem("");
   setLoading(true);
   try {
-    const res = await fetch("https://ialatamvaldir-production.up.railway.app/chat", {
+    const res = await fetch("http://56.125.188.138:8000/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
