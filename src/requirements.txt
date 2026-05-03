@@ -5,3 +5,4 @@ langchain-text-splitters
 langchain-groq
 langchain-chroma
 chromadb
+fastapi
