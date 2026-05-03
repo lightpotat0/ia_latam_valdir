@@ -6,9 +6,13 @@ from langchain_chroma import Chroma
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent 
+BASE_DIR = Path(__file__).resolve().parent.parent
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 vectorstore = Chroma(
     persist_directory=str(BASE_DIR / "chroma_db"),
+    embedding_function=embeddings
 )
 retriever = vectorstore.as_retriever(
     search_type="mmr",
