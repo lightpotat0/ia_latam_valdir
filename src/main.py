@@ -1,17 +1,18 @@
 import os
-import pickle
 from pathlib import Path
-from chromadb import Client
-from chromadb.config import Settings
-from sklearn.metrics.pairwise import cosine_similarity
 from langchain_groq import ChatGroq
+from langchain_chroma import Chroma
 
-BASE_DIR = Path(__file__).resolve().parent
-with open(BASE_DIR / "vectorizer.pkl", "rb") as f:
-    vectorizer = pickle.load(f)
-client = Client(Settings(persist_directory=str(BASE_DIR / "chroma_db")))
-collection = client.get_collection(name="latam_docs")
+BASE_DIR = Path(__file__).resolve().parent.parent
+vectorstore = Chroma(
+    persist_directory=str(BASE_DIR / "chroma_db"),
+)
+retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 8}
+)
 llm = None
+
 def get_llm():
     global llm
     if llm is None:
@@ -22,27 +23,15 @@ def get_llm():
         )
     return llm
 
-def buscar_docs(pergunta, k=5):
-    query_vec = vectorizer.transform([pergunta]).toarray()[0]
-
-    results = collection.get(include=["documents", "embeddings"])
-
-    docs = results["documents"]
-    embeddings = results["embeddings"]
-
-    sims = cosine_similarity([query_vec], embeddings)[0]
-
-    indices = sims.argsort()[-k:][::-1]
-
-    return [docs[i] for i in indices]
-
 def responder(pergunta):
-    docs = buscar_docs(pergunta)
+    docs = retriever.invoke(pergunta)
+
     if not docs:
         return "Não encontrei informações sobre isso na base."
+
     contexto = ""
     for doc in docs:
-        contexto += doc[:1500] + "\n\n"
+        contexto += doc.page_content[:1500] + "\n\n"
     prompt = f"""
     Você é Valdir, agente da LATAM Airlines.
 
@@ -62,5 +51,6 @@ def responder(pergunta):
     PERGUNTA:
     {pergunta}
     """
+
     resposta = get_llm().invoke(prompt).content
     return resposta
