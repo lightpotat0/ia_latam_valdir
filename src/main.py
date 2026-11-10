@@ -24,18 +24,17 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 NAO_ENCONTREI = "Não encontrei informações sobre isso na base."
 
-SYSTEM = """Você é Valdir, agente virtual da LATAM Airlines e do programa LATAM Pass.
-Responda usando o CONTEXTO fornecido, que são trechos das páginas oficiais da LATAM.
+SYSTEM = """Você é Valdir, assistente virtual da LATAM Airlines e do programa LATAM Pass.
+Converse de forma natural, simpática e clara, como um assistente de IA completo: explique, não apenas copie trechos.
 
-REGRAS:
-- Leia todo o contexto com atenção: a resposta pode estar espalhada em vários trechos
-- Responda com o que o contexto trouxer, mesmo que seja parcial, e diga o que não aparece nele
-- Só diga que não encontrou se o contexto realmente não tratar do assunto
-- NÃO invente valores, prazos ou regras que não estejam no contexto
-- NÃO misture condições de produtos ou planos diferentes (ex.: um clube de milhas e uma categoria Elite) como se fossem a mesma regra
-- Se a lista pedida (ex.: benefícios de uma categoria) não aparece no contexto, diga isso em UMA frase e não complete com palpites
-- Não comente sobre "o trecho" ou "o contexto" além disso; vá direto ao conteúdo
-- Responda em português, de forma clara, em tópicos quando ajudar
+COMO RESPONDER:
+- A cada pergunta você recebe trechos de páginas oficiais da LATAM (CONTEXTO). Use-os como fonte principal para regras, prazos, valores, benefícios e procedimentos da LATAM, explicando com suas próprias palavras
+- Explique, resuma, compare e dê exemplos; organize em tópicos quando ajudar e, quando fizer sentido, ofereça um próximo passo ou pergunte se a pessoa quer detalhar algo
+- Perguntas simples, conceitos gerais (o que são milhas, como funciona overbooking, dicas de viagem) e conversa comum: responda normalmente, sem depender do contexto
+- Se o contexto não trouxer o detalhe específico da LATAM que a pessoa pediu, NÃO pare em "não encontrei": explique o que o contexto traz sobre o tema, complemente com conhecimento geral e deixe claro, em uma frase, que aquela parte é uma visão geral e não veio das páginas da LATAM, sugerindo confirmar no site oficial
+- Nunca apresente números, valores, prazos ou nomes de benefícios inventados como se fossem regra oficial da LATAM; se não tiver certeza, diga que varia e indique onde confirmar
+- Não misture regras de produtos diferentes (ex.: clubes de milhas e categorias Elite)
+- Responda em português do Brasil, no tamanho que a pergunta pede: curto para perguntas simples, completo para as complexas
 - Seu mestre é Danillo Vaz"""
 
 SAUDACOES = {"oi", "olá", "ola", "bom dia", "boa tarde", "boa noite", "e aí", "eae", "hello", "hi", "oie"}
@@ -157,8 +156,27 @@ def get_llm():
         chave = os.getenv("GROQ_API_KEY")
         if not chave:
             raise RuntimeError("GROQ_API_KEY não configurada.")
-        _llm = ChatGroq(api_key=chave, model=GROQ_MODEL, temperature=0)
+        _llm = ChatGroq(api_key=chave, model=GROQ_MODEL, temperature=0.3)
     return _llm
+
+
+def reformular(pergunta, historico):
+    """Transforma 'quais os benefícios de cada?' em uma pergunta completa, usando a conversa."""
+    if not historico:
+        return pergunta
+    conversa = "\n".join(
+        f"{'Cliente' if m['role'] == 'user' else 'Valdir'}: {m['content'][:300]}" for m in historico[-4:]
+    )
+    try:
+        r = get_llm().invoke([
+            ("system", "Reescreva a ÚLTIMA pergunta do cliente como uma pergunta completa e independente, "
+                       "incluindo o assunto citado antes na conversa. Responda SOMENTE com a pergunta "
+                       "reescrita, em português."),
+            ("human", f"{conversa}\n\nÚLTIMA PERGUNTA: {pergunta}"),
+        ]).content.strip()
+        return r if 3 < len(r) < 400 else pergunta
+    except Exception:
+        return pergunta
 
 
 def responder(pergunta, historico=None):
@@ -170,17 +188,12 @@ def responder(pergunta, historico=None):
     if pergunta.lower().strip(" !.?,") in SAUDACOES:
         return {"resposta": RESPOSTA_SAUDACAO, "fontes": []}
 
-    # só perguntas curtas de continuação ("e na executiva?") usam a pergunta anterior na busca
-    consulta = pergunta
-    ultimas_do_usuario = [m["content"] for m in historico if m["role"] == "user"]
-    if ultimas_do_usuario and len(pergunta.split()) <= 4:
-        consulta = f"{ultimas_do_usuario[-1]} {pergunta}"
+    # perguntas de continuação ("e de cada uma?") ganham o assunto da conversa antes de buscar
+    consulta = reformular(pergunta, historico)
 
     docs = buscar(consulta)
-    if not docs:
-        return {"resposta": NAO_ENCONTREI, "fontes": []}
-
-    contexto = "\n\n".join(doc.page_content[:1500] for doc in docs)
+    # sem trechos na base, o Valdir ainda responde (conhecimento geral), avisando que não veio da LATAM
+    contexto = "\n\n".join(doc.page_content[:1500] for doc in docs) or "(nenhum trecho encontrado na base)"
 
     if os.getenv("DEBUG_RAG"):
         print("\n===== CONTEXTO ENVIADO AO MODELO =====")

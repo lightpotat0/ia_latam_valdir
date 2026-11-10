@@ -196,7 +196,7 @@ function addMsg(classe, html, fontes = []) {
   if (links.length) {
     const f = document.createElement("div");
     f.className = "fontes";
-    f.append("Fontes");
+    f.append("Páginas relacionadas");
     links.forEach(u => {
       const a = document.createElement("a");
       a.href = u; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = u.replace(/^https?:\/\//, "");
