@@ -1,7 +1,6 @@
-__pycache__/
-*.pyc
-*.pyo
 .env
-.git
-.gitignore
-*.md
+state.json
+latam_arquivos_md
+__pycache__
+feedback.csv
+.idea

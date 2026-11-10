@@ -1,0 +1,6 @@
+# só para atualizar a base (site_leitor.py / timer.py), não precisa no servidor da API
+-r requirements.txt
+playwright
+markdownify
+langchain-text-splitters
+schedule

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valdir · Assistente LATAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#15123d; --muted:#5d5b82; --bg:#f3f4fb; --panel:#ffffff; --line:#dcdcf0;
+  --brand:#2b1fa3; --brand-ink:#ffffff; --accent:#e8264f; --soft:#e9e8fb;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --ink:#ecebff; --muted:#a3a1cc; --bg:#0f0e24; --panel:#191838; --line:#2d2b58;
+         --brand:#7b6cff; --brand-ink:#0f0e24; --accent:#ff5a7a; --soft:#25235a; }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "Sora",system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+header{max-width:760px;width:100%;margin:0 auto;padding:20px 20px 0;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.marca h1{margin:0;font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
+.marca p{margin:0;color:var(--muted);font-size:.9rem}
+nav{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:999px}
+nav button{border:0;background:transparent;padding:8px 18px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:500}
+nav button[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(21,18,61,.18)}
+
+main{flex:1;min-height:0;max-width:760px;width:100%;margin:0 auto;padding:16px 20px;display:flex;flex-direction:column}
+section[hidden]{display:none !important}
+#chat{flex:1;min-height:0;display:flex;flex-direction:column}
+#msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:8px 2px 16px}
+.msg{max-width:88%;padding:12px 16px;border-radius:var(--radius);word-wrap:break-word}
+.msg p{margin:0 0 .6em}.msg p:last-child{margin:0}
+.msg ul,.msg ol{margin:.2em 0 .6em;padding-left:1.3em}
+.user{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-bottom-right-radius:4px}
+.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:4px}
+.erro{align-self:flex-start;background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.fontes{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+.fontes a{color:var(--brand);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vazio{margin:auto;text-align:center;color:var(--muted)}
+.vazio h2{margin:0 0 6px;color:var(--ink);font-size:1.2rem}
+.sugestoes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.sugestoes button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.9rem}
+.sugestoes button:hover{border-color:var(--brand)}
+.digitando{display:inline-flex;gap:5px;padding:4px 0}
+.digitando i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:pulso 1.1s infinite ease-in-out}
+.digitando i:nth-child(2){animation-delay:.15s}.digitando i:nth-child(3){animation-delay:.3s}
+@keyframes pulso{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.digitando i{animation:none;opacity:.6}}
+
+form.envio{display:flex;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px}
+form.envio:focus-within{border-color:var(--brand)}
+textarea{flex:1;border:0;background:transparent;resize:none;max-height:140px;padding:8px;outline:none}
+.btn{border:0;border-radius:10px;padding:10px 18px;background:var(--brand);color:var(--brand-ink);font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sec{background:var(--soft);color:var(--ink)}
+
+#milhas,#macros{overflow-y:auto}
+.cartao{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.trecho{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px;align-items:end}
+.trecho button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1.3rem;padding:8px}
+.acoes{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.bilhete{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.bilhete .linha{display:flex;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px dashed var(--line)}
+.bilhete .total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 18px;background:var(--soft)}
+.bilhete .total b{font-size:1.7rem;color:var(--accent);letter-spacing:-.02em}
+.aviso{color:var(--accent);margin-top:12px;font-size:.9rem}
+.campo{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:10px;resize:vertical;font:inherit}
+.grade{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.macro{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.macro .texto{padding:16px 18px;white-space:pre-wrap;word-wrap:break-word}
+.macro mark{background:var(--soft);color:var(--accent);padding:0 4px;border-radius:4px;font-weight:600}
+.macro .barra{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 18px;background:var(--soft);flex-wrap:wrap}
+.macro .barra small{color:var(--muted)}
+footer{max-width:760px;width:100%;margin:0 auto;padding:0 20px 14px;font-size:.78rem;color:var(--muted)}
+@media (max-width:520px){.grade{grid-template-columns:1fr}.trecho{grid-template-columns:1fr 1fr}.trecho button{grid-column:1/-1;justify-self:end;padding:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="marca">
+    <h1>Valdir</h1>
+    <p>Assistente de dúvidas sobre a LATAM</p>
+  </div>
+  <nav role="tablist" aria-label="Seções">
+    <button role="tab" id="tab-chat" aria-selected="true" aria-controls="chat">Conversa</button>
+    <button role="tab" id="tab-milhas" aria-selected="false" aria-controls="milhas">Calcular milhas</button>
+    <button role="tab" id="tab-macros" aria-selected="false" aria-controls="macros">Macros</button>
+  </nav>
+</header>
+
+<main>
+  <section id="chat" role="tabpanel" aria-labelledby="tab-chat">
+    <div id="msgs" aria-live="polite">
+      <div class="vazio" id="vazio">
+        <h2>Pergunte sobre voos, bagagem, LATAM Pass…</h2>
+        <p>Respondo com base nas páginas de ajuda do site da LATAM.</p>
+        <div class="sugestoes">
+          <button type="button">Como transfiro milhas para outra pessoa?</button>
+          <button type="button">Quais são as categorias Elite?</button>
+          <button type="button">Como funciona o resgate na classe econômica?</button>
+        </div>
+      </div>
+    </div>
+    <form class="envio" id="form">
+      <textarea id="entrada" rows="1" maxlength="1000" placeholder="Escreva sua pergunta" aria-label="Sua pergunta"></textarea>
+      <button class="btn" id="enviar" type="submit">Enviar</button>
+    </form>
+  </section>
+
+  <section id="milhas" role="tabpanel" aria-labelledby="tab-milhas" hidden>
+    <div class="cartao">
+      <label for="cabine">Cabine</label>
+      <select id="cabine"></select>
+      <div id="trechos"></div>
+      <div class="acoes">
+        <button class="btn sec" type="button" id="add">Adicionar trecho</button>
+        <button class="btn" type="button" id="calc">Calcular total</button>
+      </div>
+      <p class="aviso" id="avisoMilhas" hidden></p>
+    </div>
+    <div id="resultado"></div>
+  </section>
+  <section id="macros" role="tabpanel" aria-labelledby="tab-macros" hidden>
+    <div class="cartao">
+      <label for="situacao">Situação do cliente</label>
+      <textarea id="situacao" class="campo" rows="4" maxlength="1000" placeholder="Ex.: Cliente quer transferir milhas para a esposa e não sabe como fazer"></textarea>
+      <div class="grade">
+        <div><label for="canal">Canal</label>
+          <select id="canal"><option value="email">E-mail</option><option value="chat">Chat</option><option value="whatsapp">WhatsApp</option></select></div>
+        <div><label for="tom">Tom</label>
+          <select id="tom"><option value="cordial">Cordial</option><option value="formal">Formal</option><option value="direto">Direto</option></select></div>
+        <div><label for="nomeCliente">Nome do cliente (opcional)</label>
+          <input id="nomeCliente" class="campo" maxlength="80" placeholder="Ex.: Maria"></div>
+      </div>
+      <div class="acoes"><button class="btn" type="button" id="gerar">Gerar macro</button></div>
+      <p class="aviso" id="avisoMacro" hidden></p>
+    </div>
+    <div id="saidaMacro"></div>
+  </section>
+</main>
+
+<footer>Assistente não oficial. Confirme valores e regras no site da LATAM antes de comprar ou resgatar.</footer>
+
+<script>
+// Se o site ficar em um domínio e a API em outro, coloque a URL da API aqui (sem barra no final).
+// Se o FastAPI servir este arquivo, deixe vazio.
+const API_URL = "";
+
+const $ = s => document.querySelector(s);
+const historico = [];
+let ocupado = false;
+
+/* ---------- abas ---------- */
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  const alvo = b.id.replace("tab-", "");
+  document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x === b));
+  ["chat", "milhas", "macros"].forEach(s => { $("#" + s).hidden = s !== alvo; });
+  if (alvo === "milhas" && !opcoes) carregarOpcoes();
+}));
+
+/* ---------- texto seguro ---------- */
+const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function md(texto){
+  const inline = s => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  let html = "", lista = null;
+  const fecha = () => { if (lista) { html += `</${lista}>`; lista = null; } };
+  for (const l of esc(texto).split("\n")) {
+    let m;
+    if ((m = l.match(/^\s*[-*•]\s+(.*)/))) { if (lista !== "ul") { fecha(); html += "<ul>"; lista = "ul"; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (lista !== "ol") { fecha(); html += "<ol>"; lista = "ol"; } html += `<li>${inline(m[1])}</li>`; }
+    else if (!l.trim()) fecha();
+    else { fecha(); html += `<p>${inline(l)}</p>`; }
+  }
+  fecha();
+  return html;
+}
+
+/* ---------- chat ---------- */
+function addMsg(classe, html, fontes = []) {
+  $("#vazio")?.remove();
+  const el = document.createElement("div");
+  el.className = "msg " + classe;
+  el.innerHTML = html;
+  const links = fontes.filter(u => /^https?:\/\//.test(u));
+  if (links.length) {
+    const f = document.createElement("div");
+    f.className = "fontes";
+    f.append("Fontes");
+    links.forEach(u => {
+      const a = document.createElement("a");
+      a.href = u; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = u.replace(/^https?:\/\//, "");
+      f.append(a);
+    });
+    el.append(f);
+  }
+  $("#msgs").append(el);
+  $("#msgs").scrollTop = $("#msgs").scrollHeight;
+  return el;
+}
+
+async function enviar(texto) {
+  texto = texto.trim();
+  if (!texto || ocupado) return;
+  ocupado = true; $("#enviar").disabled = true;
+  addMsg("user", `<p>${esc(texto)}</p>`);
+  $("#entrada").value = ""; ajustaAltura();
+  const espera = addMsg("bot", '<span class="digitando" aria-label="Valdir está respondendo"><i></i><i></i><i></i></span>');
+  try {
+    const r = await fetch(API_URL + "/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({pergunta: texto, historico: historico.slice(-6)})
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Não consegui processar essa pergunta.");
+    espera.remove();
+    addMsg("bot", md(d.resposta), d.fontes || []);
+    historico.push({role: "user", content: texto}, {role: "assistant", content: d.resposta});
+  } catch (e) {
+    espera.remove();
+    addMsg("erro", `<p>${esc(e.message || "Falha de conexão.")} Tente enviar de novo.</p>`);
+  } finally {
+    ocupado = false; $("#enviar").disabled = false; $("#entrada").focus();
+  }
+}
+$("#form").addEventListener("submit", e => { e.preventDefault(); enviar($("#entrada").value); });
+$("#entrada").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviar(e.target.value); } });
+function ajustaAltura(){ const t = $("#entrada"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 140) + "px"; }
+$("#entrada").addEventListener("input", ajustaAltura);
+document.querySelectorAll(".sugestoes button").forEach(b => b.addEventListener("click", () => enviar(b.textContent)));
+
+/* ---------- calculadora de milhas ---------- */
+let opcoes = null;
+const fmt = n => Number(n).toLocaleString("pt-BR");
+
+async function carregarOpcoes() {
+  try {
+    const r = await fetch(API_URL + "/opcoes");
+    if (!r.ok) throw new Error();
+    opcoes = await r.json();
+    $("#cabine").innerHTML = Object.keys(opcoes).map(c => `<option>${esc(c)}</option>`).join("");
+    $("#trechos").innerHTML = "";
+    addTrecho();
+  } catch {
+    avisoMilhas("Não consegui carregar as tabelas de milhas. Verifique se o servidor está no ar.");
+  }
+}
+function avisoMilhas(t){ const a = $("#avisoMilhas"); a.textContent = t || ""; a.hidden = !t; }
+function opts(lista, atual){ return lista.map(x => `<option${x === atual ? " selected" : ""}>${esc(x)}</option>`).join(""); }
+
+function addTrecho() {
+  const tabela = opcoes[$("#cabine").value] || {};
+  const origens = Object.keys(tabela);
+  if (!origens.length) return;
+  const div = document.createElement("div");
+  div.className = "trecho";
+  div.innerHTML = `
+    <div><label>Origem</label><select class="o">${opts(origens)}</select></div>
+    <div><label>Destino</label><select class="d"></select></div>
+    <button type="button" title="Remover trecho" aria-label="Remover trecho">×</button>`;
+  const o = div.querySelector(".o"), d = div.querySelector(".d");
+  const atualizaDestinos = () => { d.innerHTML = opts(tabela[o.value] || []); };
+  o.addEventListener("change", atualizaDestinos); atualizaDestinos();
+  div.querySelector("button").addEventListener("click", () => { if ($("#trechos").children.length > 1) div.remove(); });
+  $("#trechos").append(div);
+}
+$("#add").addEventListener("click", () => opcoes && addTrecho());
+$("#cabine").addEventListener("change", () => { $("#trechos").innerHTML = ""; $("#resultado").innerHTML = ""; addTrecho(); });
+
+$("#calc").addEventListener("click", async () => {
+  avisoMilhas("");
+  const trechos = [...document.querySelectorAll(".trecho")].map(t => ({origem: t.querySelector(".o").value, destino: t.querySelector(".d").value}));
+  try {
+    const r = await fetch(API_URL + "/calcular", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({cabine: $("#cabine").value, trechos})
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Não foi possível calcular.");
+    $("#resultado").innerHTML = `<div class="bilhete">
+      ${d.detalhes.map(x => `<div class="linha"><span>${esc(x.origem)} → ${esc(x.destino)}</span><span>${fmt(x.milhas)} milhas</span></div>`).join("")}
+      <div class="total"><span>Total · ${esc(d.cabine)}</span><b>${fmt(d.total)} milhas</b></div></div>`;
+  } catch (e) { avisoMilhas(e.message); }
+});
+
+/* ---------- macros de atendimento ---------- */
+function avisoMacro(t){ const a = $("#avisoMacro"); a.textContent = t || ""; a.hidden = !t; }
+
+$("#gerar").addEventListener("click", async () => {
+  const situacao = $("#situacao").value.trim();
+  if (situacao.length < 5) { avisoMacro("Descreva a situação do cliente."); return; }
+  avisoMacro("");
+  const btn = $("#gerar");
+  btn.disabled = true; btn.textContent = "Gerando...";
+  try {
+    const r = await fetch(API_URL + "/macro", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        situacao, canal: $("#canal").value, tom: $("#tom").value,
+        nome_cliente: $("#nomeCliente").value.trim() || null
+      })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Não foi possível gerar a macro.");
+
+    const html = esc(d.macro).replace(/\[CONFIRMAR[^\]]*\]/g, m => `<mark>${m}</mark>`);
+    const fontes = (d.fontes || []).length ? `${d.fontes.length} fonte(s) consultadas` : "sem fontes na base";
+    $("#saidaMacro").innerHTML = `<div class="macro">
+      <div class="texto">${html}</div>
+      <div class="barra"><small>${fontes} · revise os trechos em destaque antes de enviar</small>
+      <button class="btn sec" type="button" id="copiar">Copiar</button></div></div>`;
+    $("#copiar").addEventListener("click", async e => {
+      try { await navigator.clipboard.writeText(d.macro); e.target.textContent = "Copiado!"; }
+      catch { avisoMacro("Não consegui copiar automaticamente. Selecione o texto e copie."); }
+    });
+  } catch (e) { avisoMacro(e.message || "Falha de conexão."); }
+  finally { btn.disabled = false; btn.textContent = "Gerar macro"; }
+});
+</script>
+</body>
+</html>
